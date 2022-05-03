@@ -8,6 +8,7 @@ export default class Grid {
     gridElement.style.setProperty("--grid-size", GRID_SIZE);
     gridElement.style.setProperty("--cell-size", `${CELL_SIZE}vmin`);
     gridElement.style.setProperty("--cell-gap", `${CELL_GAP}vmin`);
+    // 創建 GRID_SIZE * GRID_SIZE 的表格
     this.#cells = createCellElements(gridElement).map((cellElement, index) => {
       return new Cell(
         cellElement,
@@ -82,7 +83,6 @@ class Cell {
 
   set mergeTile(value) {
     this.#mergeTile = value;
-    console.log(value);
     if (value == null) return;
     this.#mergeTile.x = this.#x;
     this.#mergeTile.y = this.#y;
@@ -103,6 +103,7 @@ class Cell {
   }
 }
 
+// 創建 4*4 表格
 function createCellElements(gridElement) {
   const cells = [];
   for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
