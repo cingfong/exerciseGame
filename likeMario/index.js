@@ -59,6 +59,8 @@ const keys = {
     pressed: false,
   },
 };
+let scrollOffset = 0;
+
 const player = new Player();
 const platforms = [
   new Platform({ x: 200, y: 100 }),
@@ -81,10 +83,12 @@ function animate() {
   } else {
     player.velocity.x = 0;
     if (keys.right.pressed) {
+      scrollOffset += 5;
       platforms.forEach((platform) => {
         platform.position.x -= 5;
       });
     } else if (keys.left.pressed) {
+      scrollOffset -= 5;
       platforms.forEach((platform) => {
         platform.position.x += 5;
       });
@@ -104,6 +108,7 @@ function animate() {
       player.velocity.y = 0;
     }
   });
+  if (scrollOffset > 2000) console.log("your win");
 }
 
 animate();
