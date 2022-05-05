@@ -89,6 +89,7 @@ class Cell {
   }
 
   canAccept(tile) {
+    // 判斷有無合併過，或者沒有值
     return (
       this.tile == null ||
       (this.mergeTile == null && this.tile.value === tile.value)

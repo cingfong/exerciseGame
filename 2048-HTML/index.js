@@ -81,6 +81,7 @@ function slideTiles(cells) {
       const promises = [];
       for (let i = 1; i < group.length; i++) {
         const cell = group[i];
+        // 空值則繼續往前推進
         if (cell.tile == null) continue;
         let lastValidCell;
         for (let j = i - 1; j >= 0; j--) {
@@ -89,6 +90,7 @@ function slideTiles(cells) {
           lastValidCell = moveToCell;
         }
         if (lastValidCell != null) {
+          // 移動區塊
           promises.push(cell.tile.waitForTransition());
           if (lastValidCell.tile != null) {
             lastValidCell.mergeTile = cell.tile;
