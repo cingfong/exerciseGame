@@ -45,10 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
         grid.appendChild(obstacle)
         obstacle.style.left = obstaclePosition + 'px'
         let timerId = setInterval(function () {
-            if (obstaclePosition === 0 && obstaclePosition < 60 && position < 60) {
+            if (obstaclePosition > 0 && obstaclePosition < 60 && position < 60) {
                 clearInterval(timerId)
                 alert.innerHTML = 'Game Over'
                 isGameOver = true
+                // body.removeChild(body.firstChild)
                 while (grid.firstChild) {
                     grid.removeChild(grid.lastChild)
                 }
