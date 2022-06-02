@@ -1,13 +1,21 @@
+// 1:36:45
+import platform from '../img/platform.png'
+import hills from '../img/hills.png'
+import background from '../img/background.png'
+import platformSmallTall from '../img/platformSmallTall.png'
+
+
 const canvas = document.querySelector("canvas");
 
 const c = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = 1024;
+canvas.height = 575;
 const gravity = 1.5;
 
 class Player {
   constructor() {
+    this.speed = 10
     this.position = {
       x: 100,
       y: 100,
@@ -32,25 +40,54 @@ class Player {
     // 加上 velocity.y 是因為加入則代表下一秒的this.position.y的位置了
     if (this.position.y + this.height + this.velocity.y <= canvas.height)
       this.velocity.y += gravity;
-    else this.velocity.y = 0;
   }
 }
 class Platform {
-  constructor({ x, y }) {
+  constructor({ x, y, image }) {
     this.position = {
       x,
       y,
     };
-    this.width = 200;
-    this.height = 20;
+    this.image = image
+    this.width = image.width;
+    this.height = image.height;
   }
   draw() {
-    c.fillStyle = "blue";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    c.drawImage(this.image, this.position.x, this.position.y);
+  }
+}
+class GenericObject {
+  constructor({ x, y, image }) {
+    this.position = {
+      x,
+      y,
+    };
+    this.image = image
+    this.width = image.width;
+    this.height = image.height;
+  }
+  draw() {
+    c.drawImage(this.image, this.position.x, this.position.y);
   }
 }
 
-const keys = {
+function createImage(imageSrc) {
+  const image = new Image()
+  image.src = imageSrc
+  return image
+}
+
+// ---
+let platformImage = createImage(platform)
+
+let image = new Image()
+image.src = platform
+
+let player = new Player();
+let platforms = [];
+let genericObjects = [];
+
+let keys = {
   right: {
     pressed: false,
   },
@@ -59,38 +96,64 @@ const keys = {
   },
 };
 let scrollOffset = 0;
+// ---
+function init() {
+  platformImage = createImage(platform)
 
-const player = new Player();
-const platforms = [
-  new Platform({ x: 200, y: 100 }),
-  new Platform({ x: 500, y: 200 }),
-];
+  image = new Image()
+  image.src = platform
+
+  player = new Player();
+  platforms = [
+    new Platform({ x: (platformImage.width * 4 + 300 - 2), y: 250, image: createImage(platformSmallTall) }),
+    new Platform({ x: -1, y: 450, image: platformImage }),
+    new Platform({ x: (platformImage.width - 3), y: 450, image: platformImage }),
+    new Platform({ x: (platformImage.width * 2 + 100), y: 450, image: platformImage }),
+    new Platform({ x: (platformImage.width * 3 + 300), y: 450, image: platformImage }),
+    new Platform({ x: (platformImage.width * 4 + 300 - 2), y: 450, image: platformImage }),
+  ];
+  genericObjects = [
+    new GenericObject({ x: -1, y: -1, image: createImage(background) }),
+    new GenericObject({ x: -1, y: -1, image: createImage(hills) })
+  ];
+  scrollOffset = 0;
+}
 
 function animate() {
   //  canvas 刷新功能
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
-  player.update();
+  c.fillStyle = 'white'
+  c.fillRect(0, 0, canvas.width, canvas.height);
+  genericObjects.forEach((platform) => {
+    platform.draw()
+  })
   platforms.forEach((platform) => {
     platform.draw();
   });
+  player.update();
   // console.log('go')
   if (keys.right.pressed && player.position.x < 400) {
-    player.velocity.x = 5;
+    player.velocity.x = player.speed;
   } else if (keys.left.pressed && player.position.x > 100) {
-    player.velocity.x = -5;
+    player.velocity.x = -player.speed;
   } else {
     player.velocity.x = 0;
     if (keys.right.pressed) {
-      scrollOffset += 5;
+      scrollOffset += player.speed;
       platforms.forEach((platform) => {
-        platform.position.x -= 5;
+        platform.position.x -= player.speed;
       });
+      genericObjects.forEach((platform) => {
+        platform.position.x -= player.speed * .66
+      })
     } else if (keys.left.pressed) {
-      scrollOffset -= 5;
+      scrollOffset -= player.speed;
       platforms.forEach((platform) => {
-        platform.position.x += 5;
+        platform.position.x += player.speed;
       });
+      genericObjects.forEach((platform) => {
+        platform.position.x += player.speed * .66
+      })
     }
   }
   platforms.forEach((platform) => {
@@ -99,7 +162,7 @@ function animate() {
       player.position.y + player.height <= platform.position.y &&
       // 若物體接近時重力會下降
       player.position.y + player.height + player.velocity.y >=
-        platform.position.y &&
+      platform.position.y &&
       // 物體離開platform的x軸則也會增加重力
       player.position.x + player.width >= platform.position.x &&
       player.position.x <= platform.position.x + platform.width
@@ -107,9 +170,15 @@ function animate() {
       player.velocity.y = 0;
     }
   });
+  // wind
   if (scrollOffset > 2000) console.log("your win");
+  //loss
+  if (player.position.y > canvas.height) {
+    init()
+  }
 }
 
+init()
 animate();
 // 應加上 window 但是沒加也算是window的新增事件
 addEventListener("keydown", ({ keyCode }) => {
@@ -123,10 +192,9 @@ addEventListener("keydown", ({ keyCode }) => {
       keys.right.pressed = true;
       break;
     case 87:
-      player.velocity.y -= 20;
+      player.velocity.y -= 10;
       break;
   }
-  console.log(keys.left.pressed);
 });
 
 // 應加上 window 但是沒加也算是window的新增事件
